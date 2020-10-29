@@ -1,0 +1,4 @@
+{
+    "python.pythonPath": "/Users/soohancho/Desktop/sparta/trantranslate/.venv/bin/python3.9",
+    "python.formatting.provider": "black"
+}
