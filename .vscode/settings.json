@@ -1,4 +1,7 @@
 {
     "python.pythonPath": "/Users/soohancho/Desktop/sparta/trantranslate/.venv/bin/python3.9",
-    "python.formatting.provider": "black"
+    "python.formatting.provider": "black",
+    "python.linting.pylintEnabled": true,
+    "python.linting.flake8Enabled": false,
+    "python.linting.enabled": true
 }
