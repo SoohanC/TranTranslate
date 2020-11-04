@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='favicon-16x16.png') }}"
+    />
+    <title>TranTranslate</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.15.1/css/all.css"
+      integrity="sha384-vp86vTRFVJgpjF9jiIGPEEqYqlDwgyBgEF109VFjmqGmIY/Y4HV4d3Gp2irVfcrp"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.min.js"
+      integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      function onChangeSelect(option) {
+        switch (option) {
+          case "en":
+            $("#jsTranslateLang1").text("일본어 (Japanese)");
+            $("#jsTranslateLang2").text("중국어 (Simplified Chinese)");
+            break;
+          case "ja":
+            $("#jsTranslateLang1").text("영어 (English)");
+            $("#jsTranslateLang2").text("중국어 (Simplified Chinese)");
+            break;
+          case "zh-cn":
+            $("#jsTranslateLang1").text("영어 (English)");
+            $("#jsTranslateLang2").text("일본어 (Japanese)");
+            break;
+          default:
+            console.log("no");
+        }
+      }
+
+      function sendTextReqeust() {
+        let string = $("#jsTranslateInput").val();
+        let dest = $("#jsTranslateTo").val();
+        if (string) {
+          $.ajax({
+            type: "POST",
+            url: "/translate",
+            data: { string, dest },
+            success: function (res) {
+              const result1 = res.trans1;
+              const result2 = res.trans2;
+              $("#jsResult1").val(result1);
+              $("#jsResult2").val(result2);
+            },
+          });
+        }
+      }
+
+      function sendMultiTransRequest() {
+        console.log("abc");
+        let string = $("#jsResult1").val();
+        let src = $("#jsTranslateTo").val();
+        let dest1;
+        let dest2;
+        if (src) {
+          switch (src) {
+            case "en":
+              dest1 = "ja";
+              dest2 = "zh-cn";
+              break;
+            case "ja":
+              dest1 = "en";
+              dest2 = "zh-cn";
+              break;
+            case "zh-cn":
+              dest1 = "en";
+              dest2 = "ja";
+              break;
+            default:
+              console.log("no");
+          }
+          $.ajax({
+            type: "POST",
+            url: "/multi-trans",
+            data: { string, src, dest1, dest2 },
+            success: function (res) {
+              if (res.result === "success") {
+                const result1 = res.firstResult1;
+                const result2 = res.firstResult2;
+                const finalResult1 = res.finalResult1;
+                const finalResult2 = res.finalResult2;
+                $("#jsMultiResult1").val(result1);
+                $("#jsMultiResult2").val(result2);
+                $("#jsFinalResult1").val(finalResult1);
+                $("#jsFinalResult2").val(finalResult2);
+              }
+            },
+          });
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <header class="header">
+      <div class="header-column">
+        <div class="header-logo" id="jsClickLogo">TranTranslate</div>
+        <span class="header-version">alpha</span>
+      </div>
+      <div class="header-column">
+        <div class="header-menu">
+          <div class="header-menu-item">About us</div>
+          <div class="header-menu-item">How to use</div>
+          <div class="header-menu-item">Contact</div>
+        </div>
+      </div>
+    </header>
+    <main class="main">
+      <div class="main-message">
+        <div class="message-content">
+          현재는 한국어 번역-재번역-다중번역 기능만 지원하고 있습니다. Google 번역 엔진을
+          이용합니다.
+        </div>
+      </div>
+      <div class="translate-container">
+        <div class="translate-box">
+          <div class="translate-header">
+            <span class="tr-header-label">원본</span>
+            <span class="tr-header-langtype">한국어 (Korean)</span>
+          </div>
+          <textarea
+            placeholder="번역할 문장을 100자 이내로 입력하세요"
+            id="jsTranslateInput"
+          ></textarea>
+          <div class="translate-footer">
+            <span class="text-length">문자 수 : 0/100</span>
+            <button onclick="sendTextReqeust()">번역</button>
+          </div>
+        </div>
+        <i class="fas fa-caret-right"></i>
+        <div class="translate-box">
+          <div class="translate-header">
+            <span class="tr-header-label">번역</span>
+            <select
+              class="tr-header-dropdown"
+              id="jsTranslateTo"
+              onchange="onChangeSelect(this.options[this.selectedIndex].value)"
+            >
+              <option value="">번역할 언어 선택</option>
+              <option value="en">영어</option>
+              <option value="ja">일본어</option>
+              <option value="zh-cn">중국어 간체</option>
+            </select>
+          </div>
+          <textarea
+            placeholder="번역결과가 여기에 출력됩니다."
+            id="jsResult1"
+          ></textarea>
+          <div class="translate-footer">
+            <span class="text-length">번역본 문자수 : 0</span>
+            <button onclick="sendMultiTransRequest()">다중언어 번역</button>
+          </div>
+        </div>
+        <i class="fas fa-caret-right"></i>
+        <div class="translate-box">
+          <div class="translate-header">
+            <span class="tr-header-label">재번역</span>
+
+            <span class="tr-header-langtype">한국어 (Korean)</span>
+          </div>
+
+          <textarea
+            placeholder="재번역결과가 여기에 출력됩니다."
+            id="jsResult2"
+          ></textarea>
+          <div class="translate-footer">
+            <span class="text-length">총 번역 Cost: 0</span>
+          </div>
+        </div>
+      </div>
+      <div class="translate-container">
+        <div class="translate-box"></div>
+        <i class="fas fa-caret-right" style="color: white"></i>
+        <div class="translate-box">
+          <i class="fas fa-caret-down"></i>
+          <div class="translate-header">
+            <span class="tr-header-label">이중 번역</span>
+            <span class="tr-header-langtype" id="jsTranslateLang1"></span>
+          </div>
+          <textarea
+            placeholder="번역결과가 여기에 출력됩니다."
+            id="jsMultiResult1"
+          ></textarea>
+          <div class="translate-footer">
+            <span class="text-length">번역본 문자수 : 0</span>
+          </div>
+        </div>
+        <i class="fas fa-caret-right"></i>
+        <div class="translate-box">
+          <i class="fas fa-caret-down" style="color: white"></i>
+          <div class="translate-header">
+            <span class="tr-header-label">다중 재번역</span>
+            <span class="tr-header-langtype">한국어 (Korean)</span>
+          </div>
+          <textarea
+            placeholder="재번역결과가 여기에 출력됩니다."
+            id="jsFinalResult1"
+          ></textarea>
+          <div class="translate-footer">
+            <span class="text-length">총 번역 Cost: 0</span>
+          </div>
+        </div>
+      </div>
+      <div class="translate-container">
+        <div class="translate-box"></div>
+        <i class="fas fa-caret-right" style="color: white"></i>
+        <div class="translate-box">
+          <div class="translate-header">
+            <span class="tr-header-label">이중 번역</span>
+            <span class="tr-header-langtype" id="jsTranslateLang2"></span>
+          </div>
+          <textarea
+            placeholder="번역결과가 여기에 출력됩니다."
+            id="jsMultiResult2"
+          ></textarea>
+          <div class="translate-footer">
+            <span class="text-length">번역본 문자수 : 0</span>
+          </div>
+        </div>
+        <i class="fas fa-caret-right"></i>
+        <div class="translate-box">
+          <div class="translate-header">
+            <span class="tr-header-label">다중 재번역</span>
+            <span class="tr-header-langtype">한국어 (Korean)</span>
+          </div>
+          <textarea
+            placeholder="재번역결과가 여기에 출력됩니다."
+            id="jsFinalResult2"
+          ></textarea>
+          <div class="translate-footer">
+            <span class="text-length">총 번역 Cost: 0</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="company">© 2020 TranTranslate</div>
+    </footer>
+  </body>
+</html>
