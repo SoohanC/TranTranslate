@@ -6,8 +6,12 @@ app = Flask(__name__)
 translator=Translator()
 
 @app.route('/')
-def home():  # 함수명 수정 - 이름만 보고 접속되는 페이지를 확인할 수 있게!
-    return render_template('index.html')
+def intro():  # 함수명 수정 - 이름만 보고 접속되는 페이지를 확인할 수 있게!
+    return render_template('intro.html')
+
+@app.route('/main')
+def main():  # 함수명 수정 - 이름만 보고 접속되는 페이지를 확인할 수 있게!
+    return render_template('main.html')
 
 @app.route('/translate',methods=["POST"])
 def translate_input():
