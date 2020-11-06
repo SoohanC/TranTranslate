@@ -33,6 +33,13 @@
       crossorigin="anonymous"
     ></script>
     <script>
+      let sessionCost = 0;
+      $(document).ready(function () {
+            $("#jsSessionCost").text(sessionCost);
+        });
+
+      
+
       function onChangeSelect(option) {
         switch (option) {
           case "en":
@@ -63,15 +70,30 @@
             success: function (res) {
               const result1 = res.trans1;
               const result2 = res.trans2;
+              const inputLength = string.length;
+              const result1Length = result1.length;
+              let similarity = res.similarity;
+              similarity = Math.floor(similarity * 100);
+              let lev = res.lev;
+              lev = Math.floor(lev * 100);
+              $("#jsInputLength").text(`문자수: ${inputLength}`);
+              $("#jsResult1Length").text(`번역본 문자수 : ${result1Length}`);
+              $("#jsTotalCost").text(
+                `총 번역 Cost: ${inputLength + result1Length}`
+              );
               $("#jsResult1").val(result1);
               $("#jsResult2").val(result2);
+              $("#jsSimilarity1").text(`유사도: ${similarity}% ${lev}%`);
+              sessionCost += inputLength + result1Length;
+              $("#jsSessionCost").text(sessionCost);
+
             },
           });
         }
       }
 
       function sendMultiTransRequest() {
-        console.log("abc");
+        let original = $("#jsTranslateInput").val();
         let string = $("#jsResult1").val();
         let src = $("#jsTranslateTo").val();
         let dest1;
@@ -96,17 +118,36 @@
           $.ajax({
             type: "POST",
             url: "/multi-trans",
-            data: { string, src, dest1, dest2 },
+            data: { original, string, src, dest1, dest2 },
             success: function (res) {
               if (res.result === "success") {
+                console.log(res);
                 const result1 = res.firstResult1;
                 const result2 = res.firstResult2;
                 const finalResult1 = res.finalResult1;
                 const finalResult2 = res.finalResult2;
+                let similarity1 = res.similarity1;
+                similarity1 = Math.floor(similarity1 * 100);
+                let similarity2 = res.similarity2;
+                similarity2 = Math.floor(similarity2 * 100);
+                let test1 = res.test1;
+                test1 = Math.floor(test1 * 100);
+                let test2 = res.test2;
+                test2 = Math.floor(test2 * 100);
+                //cost
+                $("#jsMulResultLength1").text(`번역본 문자수 : ${result1.length}`);
+                $("#jsMulResultLength2").text(`번역본 문자수 : ${result2.length}`);
+                $("#jsFinalCost1").text(`총 번역 Cost: ${string.length+result1.length}`);
+                $("#jsFinalCost2").text(`총 번역 Cost: ${result2.length}`);
+                //
                 $("#jsMultiResult1").val(result1);
                 $("#jsMultiResult2").val(result2);
                 $("#jsFinalResult1").val(finalResult1);
                 $("#jsFinalResult2").val(finalResult2);
+                $("#jsSimilarity2").text(`유사도: ${similarity1}% ${test1}%`);
+                $("#jsSimilarity3").text(`유사도: ${similarity2}% ${test2}%`);
+                sessionCost += string.length+result1.length+result2.length;
+               $("#jsSessionCost").text(sessionCost);
               }
             },
           });
@@ -131,8 +172,8 @@
     <main class="main">
       <div class="main-message">
         <div class="message-content">
-          현재는 한국어 번역-재번역-다중번역 기능만 지원하고 있습니다. Google 번역 엔진을
-          이용합니다.
+          현재는 한국어 번역-재번역-다중번역 기능만 지원하고 있습니다. Google
+          번역 엔진을 이용합니다.
         </div>
       </div>
       <div class="translate-container">
@@ -146,7 +187,7 @@
             id="jsTranslateInput"
           ></textarea>
           <div class="translate-footer">
-            <span class="text-length">문자 수 : 0/100</span>
+            <span class="text-length" id="jsInputLength">문자수 :</span>
             <button onclick="sendTextReqeust()">번역</button>
           </div>
         </div>
@@ -170,7 +211,9 @@
             id="jsResult1"
           ></textarea>
           <div class="translate-footer">
-            <span class="text-length">번역본 문자수 : 0</span>
+            <span class="text-length" id="jsResult1Length"
+              >번역본 문자수 :</span
+            >
             <button onclick="sendMultiTransRequest()">다중언어 번역</button>
           </div>
         </div>
@@ -187,7 +230,8 @@
             id="jsResult2"
           ></textarea>
           <div class="translate-footer">
-            <span class="text-length">총 번역 Cost: 0</span>
+            <span class="text-length" id="jsTotalCost">총 번역 Cost:</span>
+            <span class="text-length" id="jsSimilarity1">유사도:</span>
           </div>
         </div>
       </div>
@@ -205,7 +249,7 @@
             id="jsMultiResult1"
           ></textarea>
           <div class="translate-footer">
-            <span class="text-length">번역본 문자수 : 0</span>
+            <span class="text-length" id="jsMulResultLength1">번역본 문자수: </span>
           </div>
         </div>
         <i class="fas fa-caret-right"></i>
@@ -220,7 +264,8 @@
             id="jsFinalResult1"
           ></textarea>
           <div class="translate-footer">
-            <span class="text-length">총 번역 Cost: 0</span>
+            <span class="text-length" id="jsFinalCost1">총 번역 Cost: </span>
+            <span class="text-length" id="jsSimilarity2">유사도:</span>
           </div>
         </div>
       </div>
@@ -237,7 +282,7 @@
             id="jsMultiResult2"
           ></textarea>
           <div class="translate-footer">
-            <span class="text-length">번역본 문자수 : 0</span>
+            <span class="text-length" id="jsMulResultLength2">번역본 문자수: </span>
           </div>
         </div>
         <i class="fas fa-caret-right"></i>
@@ -251,12 +296,13 @@
             id="jsFinalResult2"
           ></textarea>
           <div class="translate-footer">
-            <span class="text-length">총 번역 Cost: 0</span>
+            <span class="text-length" id="jsFinalCost2">총 번역 Cost: </span>
+            <span class="text-length" id="jsSimilarity3">유사도:</span>
           </div>
         </div>
       </div>
     </main>
-
+    <div class="translate-cost"> 이번 세션에서 사용한 Cost : <span id="jsSessionCost"></span></div>
     <footer class="footer">
       <div class="company">© 2020 TranTranslate</div>
     </footer>
