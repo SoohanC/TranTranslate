@@ -1,2 +1,5 @@
 .venv
 TranTranslate-03cabf558256.json
+.env
+test.py
+trans_test.py
