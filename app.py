@@ -40,12 +40,15 @@ def getKakaoTrans(text, src, dest):
         result = {"status": True, "output": output}
     return result
 
+@app.route("/api", methods=["GET"])
+def serverCheck():
+    return jsonify({"status":"successfully deployed and working"})
 
 @app.route("/api/kakao/translate", methods=["POST"])
 def translate():
     data = request.get_json()
-    source = data["source"]
-    to = data["to"]
+    source="안녕하세요"
+    to="en"
     translation = getKakaoTrans(source, "kr", to)
     translated = translation["output"]
     if translation["status"] == True:
@@ -177,4 +180,4 @@ def status():
 
 
 if __name__ == "__main__":
-    app.run("localhost", port=5000, debug=True)
+    app.run(host="localhost", port=5000, debug=True)
